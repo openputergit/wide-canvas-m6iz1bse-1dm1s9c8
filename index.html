@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MENCOP - Your Mental Health Companion</title>
+    <script src="https://unpkg.com/@splinetool/viewer@0.9.490/build/spline-viewer.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/typed.js@2.0.16/dist/typed.umd.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+        }
+        .chat-container {
+            height: 400px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+        .chat-bubble {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #FFF;
+            border-bottom-color: #3B82F6;
+            border-radius: 50%;
+            animation: rotation 1s linear infinite;
+        }
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white/80 backdrop-blur-md fixed w-full top-0 z-50">
+            <nav class="container mx-auto px-4 py-4 flex justify-between items-center">
+                <div class="text-2xl font-bold text-blue-600">MENCOP</div>
+                <div class="space-x-6">
+                    <button onclick="openChat()" class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-all">
+                        Start Chat
+                    </button>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Hero Section -->
+        <main class="container mx-auto px-4 pt-24">
+            <div class="text-center py-12">
+                <h1 class="text-4xl md:text-6xl font-bold text-gray-800 mb-6">
+                    Your Mental Health <span class="text-blue-600" id="typed-text"></span>
+                </h1>
+                <p class="text-lg text-gray-600 mb-8">
+                    Connect with our AI assistant and community for support, guidance, and peace of mind
+                </p>
+            </div>
+
+            <!-- 3D Characters -->
+            <div class="grid md:grid-cols-2 gap-8 my-12">
+                <div class="bg-white/50 rounded-2xl p-4 h-[400px] flex items-center justify-center">
+                    <spline-viewer url="https://prod.spline.design/6Wq1Q7YGyHsKxWZN/scene.splinecode"></spline-viewer>
+                </div>
+                <div class="bg-white/50 rounded-2xl p-4 h-[400px] flex items-center justify-center">
+                    <spline-viewer url="https://prod.spline.design/DU7X9qB5bf5YQVHJ/scene.splinecode"></spline-viewer>
+                </div>
+            </div>
+        </main>
+
+        <!-- Chat Interface (Hidden by default) -->
+        <div id="chatInterface" class="fixed inset-0 bg-black/50 hidden place-items-center">
+            <div class="bg-white rounded-2xl w-11/12 max-w-2xl p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold">Chat with MENCOP AI</h3>
+                    <button onclick="closeChat()" class="text-gray-500 hover:text-gray-700">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <div id="chatContainer" class="chat-container bg-gray-50 rounded-xl p-4 mb-4"></div>
+                <div class="flex gap-2">
+                    <input type="text" id="userInput" placeholder="Type your message..."
+                        class="flex-1 px-4 py-2 rounded-full border focus:outline-none focus:border-blue-500">
+                    <button onclick="sendMessage()" class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700">
+                        Send
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Typing animation
+        new Typed('#typed-text', {
+            strings: ['Companion', 'Support System', 'Friend'],
+            typeSpeed: 50,
+            backSpeed: 50,
+            loop: true
+        });
+
+        let chatContainer = document.getElementById('chatContainer');
+        let userInput = document.getElementById('userInput');
+        let stage = 0; // 0: Initial, 1: Assessment, 2: Plan
+        let responses = [];
+
+        function openChat() {
+            document.getElementById('chatInterface').classList.remove('hidden');
+            document.getElementById('chatInterface').classList.add('grid');
+            if (chatContainer.children.length === 0) {
+                addMessage("Hello! I'm your MENCOP AI assistant. I'm here to help you with your mental health journey. How are you feeling today?", 'ai');
+            }
+        }
+
+        function closeChat() {
+            document.getElementById('chatInterface').classList.add('hidden');
+            document.getElementById('chatInterface').classList.remove('grid');
+        }
+
+        function addMessage(message, sender) {
+            const bubble = document.createElement('div');
+            bubble.className = `chat-bubble mb-4 ${sender === 'user' ? 'ml-auto' : 'mr-auto'} max-w-[80%]`;
+            bubble.innerHTML = `
+                <div class="${sender === 'user' ? 'bg-blue-600 text-white' : 'bg-white'} rounded-2xl px-4 py-2">
+                    ${message}
+                </div>
+            `;
+            chatContainer.appendChild(bubble);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        async function analyzeResponse(message) {
+            // Simulate AI analysis
+            responses.push(message.toLowerCase());
+            
+            if (responses.length === 1) {
+                setTimeout(() => {
+                    addMessage("I understand. Could you tell me more about what's troubling you? For example, are you experiencing anxiety, stress, or feeling down?", 'ai');
+                }, 1000);
+            } else if (responses.length === 2) {
+                setTimeout(() => {
+                    addMessage("Thank you for sharing. On a scale of 1-10, how would you rate the intensity of these feelings?", 'ai');
+                }, 1000);
+            } else if (responses.length === 3) {
+                const severity = parseInt(message);
+                if (severity > 7) {
+                    setTimeout(() => {
+                        addMessage("I notice you're experiencing intense feelings. I strongly recommend speaking with a professional therapist. Would you like me to provide some immediate coping strategies while also connecting you with a qualified therapist?", 'ai');
+                    }, 1000);
+                } else {
+                    setTimeout(() => {
+                        addMessage("I've prepared a personalized wellness plan for you. This includes daily meditation, light exercise, and connecting with our support community. Would you like to see it?", 'ai');
+                    }, 1000);
+                }
+            } else {
+                setTimeout(() => {
+                    addMessage("Remember, you're not alone. Our community is here to support you. Would you like to connect with others who have similar experiences?", 'ai');
+                }, 1000);
+            }
+        }
+
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (message) {
+                addMessage(message, 'user');
+                userInput.value = '';
+                analyzeResponse(message);
+            }
+        }
+
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
